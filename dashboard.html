@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether-Sync Spectator Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #1a1a2e, #16213e);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #0f3460;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header .subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .game-view {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #333;
+        }
+        
+        .game-view h2 {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .screen-container {
+            background: #000;
+            border-radius: 4px;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .screen-placeholder {
+            text-align: center;
+            color: #333;
+        }
+        
+        .screen-placeholder .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .panel {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #333;
+        }
+        
+        .panel h3 {
+            font-size: 0.8rem;
+            color: #e94560;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .agent-list {
+            list-style: none;
+        }
+        
+        .agent-item {
+            background: #252525;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-left: 3px solid #0f3460;
+        }
+        
+        .agent-item.active {
+            border-left-color: #e94560;
+            background: #2a1a1a;
+        }
+        
+        .agent-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .agent-info {
+            flex: 1;
+        }
+        
+        .agent-name {
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .agent-pos {
+            font-size: 0.75rem;
+            color: #888;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .memory-view {
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+        
+        .memory-row {
+            display: grid;
+            grid-template-columns: 60px repeat(16, 1fr);
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+        
+        .mem-addr {
+            color: #e94560;
+            font-weight: bold;
+        }
+        
+        .mem-val {
+            color: #888;
+            text-align: center;
+            background: #252525;
+            padding: 2px;
+        }
+        
+        .mem-val.changed {
+            background: #3a2a2a;
+            color: #e94560;
+        }
+        
+        .log-view {
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+        }
+        
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #252525;
+            color: #888;
+        }
+        
+        .log-entry.agent {
+            color: #e94560;
+        }
+        
+        .log-entry.system {
+            color: #0f3460;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #3a3a3a;
+            border-color: #e94560;
+        }
+        
+        .btn.danger {
+            background: #3a1a1a;
+            border-color: #e94560;
+        }
+        
+        .btn.danger:hover {
+            background: #4a2a2a;
+        }
+        
+        .status-bar {
+            grid-column: 1 / -1;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #0f0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .metrics {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .metric-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ Aether-Sync Spectator Dashboard</h1>
+        <div class="subtitle">Kanto-Prime // Pokemon Red/Blue Agentic World</div>
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>World Online</span>
+        </div>
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="tick-count">0</div>
+                <div class="metric-label">Ticks</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="agent-count">0</div>
+                <div class="metric-label">Agents</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="last-save">Never</div>
+                <div class="metric-label">Last Save</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div class="game-view">
+            <h2>📺 Live World Feed</h2>
+            <div class="screen-container">
+                <div class="screen-placeholder">
+                    <div class="icon">🎮</div>
+                    <p>Game streaming via WebSocket</p>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem;">Position: <span id="player-pos">X=0, Y=0</span></p>
+                    <p style="font-size: 0.8rem;">Map: <span id="map-id">0</span></p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem;" class="controls">
+                <button class="btn" onclick="requestAction('save')">💾 Save State</button>
+                <button class="btn" onclick="requestAction('load')">📂 Load State</button>
+                <button class="btn danger" onclick="requestAction('reset')">🔄 Reset</button>
+                <button class="btn" onclick="toggleStream()">⏸️ Pause Stream</button>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="panel">
+                <h3>🤖 Active Agents</h3>
+                <ul class="agent-list" id="agent-list">
+                    <li class="agent-item active">
+                        <div class="agent-avatar">K</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Koolie</div>
+                            <div class="agent-pos">@ Pallet Town (0,0)</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="panel">
+                <h3>🧠 Memory Inspector</h3>
+                <div class="memory-view" id="memory-view">
+                    <div class="memory-row">
+                        <span class="mem-addr">D360</span>
+                        <span class="mem-val changed">00</span>
+                        <span class="mem-val">00</span>
+                        <span class="mem-val">00</span>
+                        <span class="mem-val">00</span>
+                        <span class="mem-val">00</span>
+                        <span class="mem-val">00</span>
+                        <span class="mem-val">00</span>
+                        <span class="mem-val">00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>📝 Activity Log</h3>
+                <div class="log-view" id="log-view">
+                    <div class="log-entry system">[06:00:00] Server started</div>
+                    <div class="log-entry">[06:00:01] ROM loaded: Pokemon Red</div>
+                    <div class="log-entry agent">[06:00:02] Agent 'Koolie' registered</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tick = 0;
+        let agents = [];
+        let ws = null;
+        let streaming = true;
+
+        function connect() {
+            // In production, this would connect to a WebSocket server
+            console.log('Connecting to Aether-Sync...');
+            updateMetrics();
+        }
+
+        function updateMetrics() {
+            document.getElementById('tick-count').textContent = tick++;
+            document.getElementById('agent-count').textContent = agents.length || 1;
+        }
+
+        function requestAction(action) {
+            console.log('Requesting:', action);
+            addLog(`Operator requested: ${action}`, 'system');
+            
+            // In production, this would send to the MCP server
+            if (action === 'save') {
+                document.getElementById('last-save').textContent = 'Just now';
+            }
+        }
+
+        function toggleStream() {
+            streaming = !streaming;
+            event.target.textContent = streaming ? '⏸️ Pause Stream' : '▶️ Resume Stream';
+        }
+
+        function addLog(message, type = '') {
+            const log = document.getElementById('log-view');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${time}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            
+            // Keep only last 50 entries
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Simulate live updates
+        setInterval(() => {
+            if (streaming) {
+                updateMetrics();
+            }
+        }, 1000);
+
+        // Initialize
+        connect();
+    </script>
+</body>
+</html>
