@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyBoy Live View</title>
+    <meta http-equiv="refresh" content="3"> <!-- Auto-refresh every 3 seconds -->
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .screen-container {
+            background: #000;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        img {
+            max-width: 100%;
+            display: block;
+            border-radius: 5px;
+        }
+        .status {
+            color: #888;
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .refreshing {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 PyBoy Live</h1>
+    
+    <div class="screen-container">
+        <img id="game-screen" src="screenshots/latest.png" 
+             alt="PyBoy Game Screen" 
+             onerror="this.style.display='none'; document.getElementById('no-img').style.display='block';"
+             onload="this.style.display='block'; document.getElementById('no-img').style.display='none';">
+        
+        <div id="no-img" style="display: none; text-align: center; padding: 40px; color: #666;">
+            📸 Waiting for screenshot...<br>
+            <small>Screenshots auto-appear here</small>
+        </div>
+    </div>
+    
+    <p class="status refreshing">⏳ Auto-refreshing every 3 seconds...</p>
+    
+    <div class="controls">
+        <button onclick="location.reload()">🔄 Manual Refresh</button>
+        <button onclick="window.open('dashboard.html')">📊 Dashboard</button>
+    </div>
+    
+    <script>
+        // Update timestamp
+        const img = document.getElementById('game-screen');
+        img.src = 'screenshots/latest.png?' + new Date().getTime();
+        
+        // Force refresh
+        setInterval(() => {
+            img.src = 'screenshots/latest.png?' + new Date().getTime();
+        }, 3000);
+    </script>
+</body>
+</html>

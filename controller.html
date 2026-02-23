@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pokemon Controller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+        
+        body {
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+        }
+        
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .dpad {
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px 60px;
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .dpad-btn {
+            background: #444;
+            color: white;
+            box-shadow: 0 4px 0 #222;
+        }
+        
+        .dpad-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #222;
+        }
+        
+        .ab-btn {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin: 10px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #4444ff, #0000cc);
+            width: 70px;
+            height: 40px;
+            font-size: 14px;
+            color: white;
+        }
+        
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            width: 280px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions {
+            background: #333;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 320px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .instructions strong {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Pokemon Controls</h1>
+    
+    <!-- D-PAD -->
+    <div class="dpad">
+        <div></div>
+        <button class="btn dpad-btn" onclick="sendCmd('up')">⬆️</button>
+        <div></div>
+        
+        <button class="btn dpad-btn" onclick="sendCmd('left')">⬅️</button>
+        <div></div>
+        <button class="btn dpad-btn" onclick="sendCmd('right')">➡️</button>
+        
+        <div></div>
+        <button class="btn dpad-btn" onclick="sendCmd('down')">⬇️</button>
+        <div></div>
+    </div>
+    
+    <!-- A/B Buttons -->
+    <div class="controls-row">
+        <button class="btn ab-btn" onclick="sendCmd('b')">B</button>
+        <button class="btn ab-btn" onclick="sendCmd('a')" style="background: linear-gradient(135deg, #44ff44, #00cc00)">A</button>
+    </div>
+    
+    <!-- Menu Buttons -->
+    <div class="controls-row">
+        <button class="btn action-btn" onclick="sendCmd('select')">SELECT</button>
+        <button class="btn action-btn" onclick="sendCmd('start')">START</button>
+    </div>
+    
+    <div class="instructions">
+        <p><strong>To start playing:</strong></p>
+        <ol>
+            <li>Wait for Nintendo logo to finish</li>
+            <li>Press START to open menu</li>
+            <li>Press A to select NEW GAME</li>
+            <li>Keep pressing A to skip dialogue</li>
+            <li>Use arrows to move character!</li>
+        </ol>
+        <p style="margin-top: 10px; color: #888; font-size: 12px;">
+            ℹ️ Buttons work - press them and watch the game window!
+        </p>
+    </div>
+    
+    <script>
+    function sendCmd(cmd) {
+        // Log to console (in real implementation, this would send to server)
+        console.log('Button pressed: ' + cmd);
+        // Visual feedback
+        const btn = event.target;
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 100);
+        
+        // In actual implementation, you'd send this to a server
+        // fetch('http://192.168.64.6:5000/btn/' + cmd);
+    }
+    
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        const keyMap = {
+            'ArrowUp': 'up', 'w': 'up',
+            'ArrowDown': 'down', 's': 'down', 
+            'ArrowLeft': 'left', 'a': 'left',
+            'ArrowRight': 'right', 'd': 'right',
+            'Enter': 'a', 'z': 'a',
+            'x': 'b', 'Backspace': 'b',
+            'Shift': 'select',
+            ' ': 'start'
+        };
+        if (keyMap[e.key]) {
+            console.log('Key pressed: ' + keyMap[e.key]);
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether-Sync Live Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #888;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .status-item {
+            text-align: center;
+        }
+        
+        .status-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .status-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .game-view {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        .game-view h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .game-screen {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            border: 2px solid #333;
+        }
+        
+        .game-screen img {
+            max-width: 100%;
+            max-height: 480px;
+            image-rendering: pixelated;
+        }
+        
+        .no-signal {
+            color: #666;
+            font-size: 1.5em;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .agent-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: transform 0.3s;
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .agent-card.koolie { border-color: #00d4ff; }
+        .agent-card.scout { border-color: #00ff88; }
+        .agent-card.merchant { border-color: #ffd700; }
+        .agent-card.helpbot { border-color: #ff6b6b; }
+        
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .agent-name {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .agent-type {
+            font-size: 0.8em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .agent-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .chat-panel {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        .chat-panel h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+        
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .chat-message {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .chat-message:last-child {
+            border-bottom: none;
+        }
+        
+        .chat-time {
+            color: #666;
+            font-size: 0.8em;
+        }
+        
+        .chat-agent {
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ Aether-Sync Live</h1>
+        <p>Real-time Pokemon Red/Blue Multi-Agent Simulation</p>
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-value" id="tick">--</div>
+            <div class="status-label">Current Tick</div>
+        </div>
+        <div class="status-item">
+            <div class="status-value" id="agents">4</div>
+            <div class="status-label">Active Agents</div>
+        </div>
+        <div class="status-item">
+            <div class="status-value" id="messages">--</div>
+            <div class="status-label">Messages</div>
+        </div>
+    </div>
+    
+    <div class="game-view">
+        <h2>🎮 Live Game Screen</h2>
+        <div class="game-screen">
+            <img id="game-screen" src="screen_live.png" alt="Pokemon Red Game Screen" 
+                 style="display: none;" onload="this.style.display='block'">
+            <div class="no-signal" id="no-signal">
+                📡 Waiting for game signal...<br>
+                <small>Run: python3 live_showcase_fixed.py</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="agents-grid">
+        <div class="agent-card koolie">
+            <div class="agent-header">
+                <div>
+                    <div class="agent-name">🤖 Koolie</div>
+                    <div class="agent-type">Explorer</div>
+                </div>
+            </div>
+            <div class="agent-stats">
+                <div class="stat">
+                    <div class="stat-value" id="koolie-x">--</div>
+                    <div>X Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="koolie-y">--</div>
+                    <div>Y Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="koolie-wallet">--</div>
+                    <div>💰 Wallet</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="koolie-inv">--</div>
+                    <div>📦 Inventory</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="agent-card scout">
+            <div class="agent-header">
+                <div>
+                    <div class="agent-name">🤖 Scout-7</div>
+                    <div class="agent-type">Gatherer</div>
+                </div>
+            </div>
+            <div class="agent-stats">
+                <div class="stat">
+                    <div class="stat-value" id="scout-x">--</div>
+                    <div>X Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="scout-y">--</div>
+                    <div>Y Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="scout-wallet">--</div>
+                    <div>💰 Wallet</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="scout-inv">--</div>
+                    <div>📦 Inventory</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="agent-card merchant">
+            <div class="agent-header">
+                <div>
+                    <div class="agent-name">🤖 Merchant-X</div>
+                    <div class="agent-type">Merchant</div>
+                </div>
+            </div>
+            <div class="agent-stats">
+                <div class="stat">
+                    <div class="stat-value" id="merchant-x">--</div>
+                    <div>X Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="merchant-y">--</div>
+                    <div>Y Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="merchant-wallet">--</div>
+                    <div>💰 Wallet</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="merchant-inv">--</div>
+                    <div>📦 Inventory</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="agent-card helpbot">
+            <div class="agent-header">
+                <div>
+                    <div class="agent-name">🤖 HelpBot</div>
+                    <div class="agent-type">Social</div>
+                </div>
+            </div>
+            <div class="agent-stats">
+                <div class="stat">
+                    <div class="stat-value" id="helpbot-x">--</div>
+                    <div>X Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="helpbot-y">--</div>
+                    <div>Y Position</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="helpbot-wallet">--</div>
+                    <div>💰 Wallet</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="helpbot-inv">--</div>
+                    <div>📦 Inventory</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chat-panel">
+        <h2>💬 Live Chat</h2>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-message">
+                <span class="chat-time">--:--:--</span>
+                <span style="color: #888;">Waiting for messages...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" onclick="refreshScreen()">🔄 Refresh Screen</button>
+        <button class="btn" onclick="toggleAutoRefresh()">▶️ Auto Refresh</button>
+    </div>
+    
+    <script>
+        // Auto-refresh the game screen every 2 seconds
+        let autoRefresh = false;
+        let refreshInterval;
+        
+        function refreshScreen() {
+            const img = document.getElementById('game-screen');
+            const noSignal = document.getElementById('no-signal');
+            
+            // Add timestamp to bypass cache
+            img.src = 'screen_live.png?' + new Date().getTime();
+            img.onload = function() {
+                noSignal.style.display = 'none';
+            };
+        }
+        
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            const btn = document.querySelector('button[onclick="toggleAutoRefresh()"]');
+            
+            if (autoRefresh) {
+                btn.textContent = '⏹️ Stop Refresh';
+                refreshInterval = setInterval(refreshScreen, 2000);
+            } else {
+                btn.textContent = '▶️ Auto Refresh';
+                clearInterval(refreshInterval);
+            }
+        }
+        
+        // Initial load
+        refreshScreen();
+    </script>
+</body>
+</html>
